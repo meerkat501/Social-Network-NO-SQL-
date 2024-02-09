@@ -60,4 +60,38 @@ router.delete('/thoughts/:id', async (req, res) => {
   }
 });
 
+router.post('/thoughts/:thoughtId/reactions', async (req, res) =>{
+    try {
+        const thought = await Thought.findById(req.params.thoughtId);
+        if (!thought) {
+            return res.status(404).json({ message: 'Thought was not found'});
+        }
+        thought.reactions.push(req.body);
+        await thought.save();
+
+        res.status(201).json({ message: 'Reaction was added successfully!'})
+    } catch (err) {
+        res.status(500).json({ message: err.message})
+    }
+});
+
+router.delete('/thoughts/:thoughtId/reactions/:reactionId', async (req, res) => {
+    try {
+        const thought = await Thought.findById(req.params.thoughtId);
+        if(!thought) {
+            return res.status(404).json({ message: 'Thought was not found'});
+        }
+        const reactionIndex = thought.reactions.findIndex(reaction => reaction._id.toString() === req.params.reactionId);
+        if (reactionIndex === -1) {
+            return res.status(404).json({ message: 'Reaction was not found'});
+        }
+        thought.reactions.splice(reactionIndex, 1);
+        await thought.save();
+
+        res.json({ message: 'Reaction was removed successfully!'})
+    } catch (err) {
+        res.status(500).json({ message: err.message })
+    }
+})
+
 module.exports = router;
