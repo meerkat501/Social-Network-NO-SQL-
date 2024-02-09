@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const Thought = require('../models/Thoughts');
 
 router.get('/users',async (req, res) => {
     const users = await User.find();
@@ -56,6 +57,25 @@ router.delete('/users/:userId/friends/:friendId', async (req, res) => {
         res.json({ message: 'Friend was removed successfully!', user });
     } catch (err) {
         res.status(500).json({ message: err.message})
+    }
+});
+
+router.delete('/users/:userId', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User was not found'});
+        }
+
+        await Thought.deleteMany({ username: user.username});
+
+        await User.updateMany({}, {$pull: { friends: req.params.userId}});
+
+        await User.findByIdAndDelete(req.params.userId);
+
+        res.json({ message: 'User was successfully deleted!'});
+    } catch (err) {
+        res.status(500).json({ message: err.message});
     }
 });
 
