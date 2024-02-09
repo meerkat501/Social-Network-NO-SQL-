@@ -18,6 +18,11 @@ router.put('/users/:id', async (req, res) => {
     res.json(updatedUser);
 });
 
+router.get('/users/:id', async (req, res) => {
+   const user = await User.findById(req.params.id)
+   res.json(user);
+});
+
 router.post('/users/:userId/friends/:friendId', async (req, res) => {
     try {
         const user = await User.findById(req.params.userId);

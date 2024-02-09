@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const Thought = require('../models/Thoughts');
-const { truncate } = require('fs/promises');
 
 router.get('/thoughts', async (req, res) => {
     try {
@@ -48,15 +47,15 @@ router.put('/thoughts/:id', async (req, res) => {
 
 router.delete('/thoughts/:id', async (req, res) => {
   try {
-    const deleteThought = await Thought.findById(req.parans.id);
+    const deleteThought = await Thought.findById(req.params.id);
     if (!deleteThought) {
         return res.status(404).json({ message:'Thought not found'});
     }
 
-    await deleteThought.remove();
+    await Thought.findByIdAndDelete(req.params.id);
     res.json({ message: ' Thought was deleted successfully' });
   } catch (err) {
-    response.status(500).json({ message: err.message})
+    res.status(500).json({ message: err.message})
   }
 });
 
