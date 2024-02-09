@@ -17,4 +17,46 @@ router.put('/users/:id', async (req, res) => {
     res.json(updatedUser);
 });
 
+router.post('/users/:userId/friends/:friendId', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found'})
+        }
+        const friend = await User.findById(req.params.friendId)
+        if (!friend) {
+            return res.status(404).json({ message: 'Friend not found'})
+        }
+        if (user.friends.includes(req.params.friendId)){
+            return res.status(400).json({ message: 'User has this friend!'})
+        }
+
+        user.friends.push(req.params.friendId);
+        await user.save();
+
+        res.json({ message: 'Friend has been added successfully!'})
+    } catch (err) {
+        res.status(500).json({ message: err.message })
+    }
+});
+
+router.delete('/users/:userId/friends/:friendId', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId);
+        if (!user) {
+            return res.status(404).json({ message:'User not found!' });
+        }
+        const friendIndex = user.friends.indexOf(req.params.friendId);
+        if (friendIndex === -1) {
+            return res.status(404).json({ message: 'Friend not found in user\'s friend list' })
+        }
+        user.friends.splice(friendIndex, 1);
+        await user.save();
+
+        res.json({ message: 'Friend was removed successfully!', user });
+    } catch (err) {
+        res.status(500).json({ message: err.message})
+    }
+});
+
 module.exports = router;
